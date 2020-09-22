@@ -3,7 +3,6 @@ const ws = new WebSocket("ws://" + document.location.host + "/");
 ws.addEventListener("message", reload)
 ws.addEventListener("error", reload)
 
-
 async function reload() {
   console.log("Reloading...")
   let proms = []
