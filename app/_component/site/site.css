@@ -4,6 +4,10 @@ component-body {
   right: 0;
   top: 0;
   bottom: 0;
+  background-image: url("../../res/img/sandBackground.jpg");
+  background-size: cover;
+  background-position-y: 60%;
+  background-position-x: 37%;
 }
 
 /* @font-face {

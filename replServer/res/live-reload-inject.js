@@ -15,5 +15,5 @@ async function reload() {
 
   await Promise.all(proms)
 
-  // location.reload()
+  location.reload()
 }
