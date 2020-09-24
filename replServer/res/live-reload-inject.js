@@ -1,4 +1,4 @@
-const ws = new WebSocket(document.location.protocol === "https:" ? "wss://" : "ws://" + document.location.host + "/");
+const ws = new WebSocket((document.location.protocol === "https:" ? "wss://" : "ws://") + document.location.host + "/");
 
 ws.addEventListener("message", reload)
 ws.addEventListener("error", reload)
