@@ -6,6 +6,7 @@ export default class Slider extends Component {
   
   constructor() {
     super()
+    this.tabIndex = 0
 
   }
 

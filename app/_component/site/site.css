@@ -137,16 +137,16 @@ menu-bar > * {
   background: #f1f6fa;
   margin: 0 5px;
   cursor: pointer;
-  transition: background-color .3s, transform .3s, width .5s;
+  transition: background-color .3s, transform .3s, width .6s;
   overflow: hidden;
 }
 
-menu-bar > *:hover {
+menu-bar > *:hover, menu-bar > *:focus-within {
   background: white;
   transform: scale(1.05);
 }
 
-menu-bar > *.wide:hover {
+menu-bar > *.wide:hover, menu-bar > *.wide:focus-within {
   width: 200px;
   cursor: auto;
 }
@@ -156,7 +156,7 @@ menu-gradient {
   right: 0;
   top: 0;
   bottom: 0;
-  width: 8px;
+  width: 12px;
   background: linear-gradient(90deg, rgba(241, 246, 250, 0), rgba(241, 246, 250, 1));
 }
 
@@ -171,4 +171,11 @@ menu-bar > * > *.icon {
   top: 50%;
   left: 25px;
   transform: translate(-50%, -50%);
+}
+
+c-slider {
+  position: absolute;
+  left: 50px;
+  width: 140px;
+  height: 100%;
 }

@@ -1,0 +1,47 @@
+:host {
+  display: block;
+  min-width: 70px;
+  min-height: 20px;
+}
+
+component-body {
+  display: flex;
+  width: calc(100% - 20px);
+  height: 100%;
+  align-items: center;
+  cursor: grab;
+  margin: 0 10px;
+  box-sizing: border-box;
+}
+
+slider-bar {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: rgba(0, 0, 0, 0.486);
+  border-radius: 1px;
+}
+
+slider-handle {
+  display: block;
+  position: absolute;
+  width: 10px;
+  height: 10px;
+}
+
+slider-handle-inner {
+  border-radius: 50%;
+  background: rgba(255, 0, 0, 0.37);
+  width: 100%;
+  height: 100%;
+  display: block;
+  transform: scale(1) translateX(-50%);
+  transition: .3s;
+}
+
+:host(:focus) slider-handle-inner {
+  transform: scale(1.1) translateX(-50%);
+  background: rgba(255, 0, 0, 0.856);
+}
+
