@@ -1,4 +1,5 @@
-component-body {
+:host {
+  overflow: auto;
   position: absolute;
   left: 0;
   right: 0;
@@ -6,12 +7,168 @@ component-body {
   bottom: 0;
 }
 
-/* @font-face {
-  font-family: 'Overpass';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("./../../../res/font/overpass.woff2") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-} */
+component-body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  min-height: 200px;
+  min-width: 600px;
+  justify-content: center;
+  align-items: center;
+}
 
+background-image {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-image: url("../../res/img/sandBackground.jpg");
+  background-size: cover;
+  background-position-y: 60%;
+  background-position-x: 37%;
+  user-select: none;
+}
+
+component-body > * {
+  pointer-events: all;
+}
+
+lever-bar {
+  display: flex;
+  flex-direction: row;
+  border-radius: 7px;
+  overflow: hidden;
+  
+}
+
+lever-element {
+  position: relative;
+  float: left;
+  display: flex;
+  width: 50px;
+  height: 50px;
+  background: #090c12;
+  margin: 0 1px;
+}
+
+lever-element:last-of-type {
+  margin-right: 0;
+}
+
+lever-element:first-of-type {
+  margin-left: 0;
+}
+
+lever-number {
+  display: block;
+  font-variant-numeric: tabular-nums;
+  color: white;
+  user-select: none;
+  margin: auto;
+  font-size: 18px;
+}
+
+lil-robot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  position: absolute;
+}
+
+lil-robot.top {
+  transform: translateY(-60px) translateX(-234px);
+}
+
+lil-robot.bot {
+  transform: translateY(60px) translateX(234px);
+}
+
+
+robot-body {
+  border-radius: 7px;
+  background: #383a3d;
+  width: 40px;
+  height: 40px;
+  display: block;
+}
+
+robot-desc {
+  position: absolute;
+  color: #383a3d;
+  width: max-content;
+}
+
+lil-robot.top robot-desc {
+  transform: translateY(-38px);
+}
+
+lil-robot.bot robot-desc {
+  transform: translateY(38px);
+}
+
+menu-bar {
+  bottom: 20px;
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+}
+
+menu-bar:last-child {
+  margin-right: 0;
+}
+
+menu-bar:first-child {
+  margin-left: 0;
+}
+
+menu-bar > * {
+  position: relative;
+  border-radius: 7px;
+  float: left;
+  display: flex;
+  width: 50px;
+  height: 50px;
+  background: #f1f6fa;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: background-color .3s, transform .3s, width .5s;
+  overflow: hidden;
+}
+
+menu-bar > *:hover {
+  background: white;
+  transform: scale(1.05);
+}
+
+menu-bar > *.wide:hover {
+  width: 200px;
+  cursor: auto;
+}
+
+menu-gradient {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background: linear-gradient(90deg, rgba(241, 246, 250, 0), rgba(241, 246, 250, 1));
+}
+
+menu-bar > *:hover > menu-gradient {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 1));
+}
+
+menu-bar > * > *.icon {
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  top: 50%;
+  left: 25px;
+  transform: translate(-50%, -50%);
+}

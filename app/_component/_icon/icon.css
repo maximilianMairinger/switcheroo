@@ -1,0 +1,15 @@
+:host {
+  display: inline-block;
+  width: 32px;
+  height: 32px
+}
+
+
+svg {
+  width: inherit;
+  height: inherit;
+}
+
+:host *:not(tspan) {
+  transition: inherit
+}
