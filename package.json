@@ -80,8 +80,10 @@
   },
   "dependencies": {
     "ajaon": "^1.5.11",
+    "animation-frame-delta": "^2.4.1",
     "extended-dom": "^3.4.11",
-    "josm": "^1.1.18"
+    "josm": "^1.1.18",
+    "waapi-easing": "^1.0.1"
   },
   "version": "1.0.0-repl"
 }
