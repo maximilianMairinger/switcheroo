@@ -3,8 +3,9 @@ import declareComponent from "../../lib/declareComponent"
 import "./../../global"
 import { EventListener } from "extended-dom"
 import { Data } from "josm"
-import animationFrame, { ElapsingSubscription } from "animation-frame-delta"
+import animationFrame, { CancelAbleSubscriptionPromise, ElapsingSubscription } from "animation-frame-delta"
 import Easing from "waapi-easing"
+import { initPrototype } from "extended-dom/app/dist/components/elementList"
 
 
 const coverElem = ce("slider-cover").css({
@@ -30,7 +31,7 @@ export default class Slider extends Component {
     this.tabIndex = 0
 
     this.progress = new Data(initialProgress);
-    (this.progress as Data<number>).tunnel((progress) => {
+    this.normalizedProgress = (this.progress as Data<number>).tunnel((progress) => {
       if (progress < 0) progress = 0
       else if (progress > 1) progress = 1
       return progress
@@ -46,29 +47,43 @@ export default class Slider extends Component {
 
     const calcOffsetFunc = (e: MouseEvent) => {
       this.currentOffsetOfBar = this.bar.absoluteOffset()
-      this.progress.set((e.x - this.currentOffsetOfBar.left / this.currentOffsetOfBar.width))
+      this.progress.set(((e.x - this.currentOffsetOfBar.left) / currentWidth))
       this.currentOffsetOfBar = undefined
     }
 
     let properProgress = this.properProgress = new Data(initialProgress)
     let lastProgress = initialProgress
-    let lastSubscription: ElapsingSubscription
+    let lastSubscription: CancelAbleSubscriptionPromise
+
+    let currentWidth: number
+
+    this.on("resize", (e) => {
+      currentWidth = e.width
+    })
+
 
     this.normalizedProgress.get((progress) => {
-      if ()
-      if (Math.abs(progress - lastProgress) < 1) properProgress.set(progress)
+      if (lastSubscription !== undefined) lastSubscription.cancel()
+      if (Math.abs(progress - lastProgress)  < 1) properProgress.set(progress)
       else {
         const duration = 300
+        this.currentOffsetOfBar = this.bar.absoluteOffset()
         lastSubscription = animationFrame((time) => {
           let timeProg = time / duration
           properProgress.set(lastProgress + (timeProg * 2))
         }, duration)
       }
+      lastProgress = progress
     }, false)
 
 
     activeListener.add(window.on("mousemove", calcOffsetFunc))
 
+    //@ts-ignore
+    window.properProgress = properProgress
+    properProgress.get(console.log)
+    //@ts-ignore
+    window.progress = this.progress
 
     activeListener.Inner("deactivate", [])
 
@@ -80,9 +95,7 @@ export default class Slider extends Component {
       else if (e.key === "ArrowLeft") factor = -1
 
       if (factor !== undefined) {
-        this.currentOffsetOfBar = this.bar.absoluteOffset()
         this.progress.set(this.properProgress.get() + (.1 * factor))
-        this.currentOffsetOfBar = undefined
       }
     })
 
