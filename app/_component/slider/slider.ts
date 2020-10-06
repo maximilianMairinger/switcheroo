@@ -17,6 +17,9 @@ const coverElem = ce("slider-cover").css({
   zIndex:  10000000, 
   cursor: "grabbing"
 })
+coverElem.on("dragstart", (e) => {
+  e.preventDefault()
+})
 
 
 const animationDurationPer100px = 2400
@@ -173,10 +176,6 @@ export default class Slider extends Component {
       if (factor !== undefined) {
         this.progress.set(this.properProgress.get() + (.1 * factor))
       }
-    })
-
-    this.on("dragstart", (e) => {
-      e.preventDefault()
     })
 
     this.on("mousedown", (e) => {
