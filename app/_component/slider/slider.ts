@@ -2,8 +2,8 @@ import Component from "../component"
 import declareComponent from "../../lib/declareComponent"
 import "./../../global"
 import { EventListener } from "extended-dom"
-import { Data } from "josm"
-import animationFrame, { CancelAbleSubscriptionPromise, ElapsingSubscription } from "animation-frame-delta"
+import { Data, DataCollection } from "josm"
+import animationFrame, { CancelAbleElapsingSubscriptionPromise } from "animation-frame-delta"
 import Easing from "waapi-easing"
 import { initPrototype } from "extended-dom/app/dist/components/elementList"
 
@@ -18,11 +18,16 @@ const coverElem = ce("slider-cover").css({
   cursor: "grabbing"
 })
 
+
+const animationDurationPer100px = 2400
+
+const ease = new Easing("linear").function
+
 export default class Slider extends Component {
   private bar = this.q("slider-bar") as HTMLElement
+  private handle = this.q("slider-handle") as HTMLElement
 
   public progress: Pick<Data<number>, "set">
-  private currentOffsetOfBar: {left: number, width: number}
   private normalizedProgress: Data<number>
   public properProgress: Omit<Data<number>, "set">
 
@@ -46,45 +51,90 @@ export default class Slider extends Component {
     }))
 
     const calcOffsetFunc = (e: MouseEvent) => {
-      this.currentOffsetOfBar = this.bar.absoluteOffset()
-      this.progress.set(((e.x - this.currentOffsetOfBar.left) / currentWidth))
-      this.currentOffsetOfBar = undefined
+      let offset = this.bar.absoluteOffset()
+      this.progress.set(((e.x - offset.left) / offset.width))
     }
 
     let properProgress = this.properProgress = new Data(initialProgress)
     let lastProgress = initialProgress
-    let lastSubscription: CancelAbleSubscriptionPromise
 
-    let currentWidth: number
-
-    this.on("resize", (e) => {
-      currentWidth = e.width
+    let currentWidth = this.bar.resizeData().tunnel(({width}) => width) as any as Data<number>
+    let durationForFullWidth = currentWidth.tunnel((e) => {
+      return e / 100 * animationDurationPer100px
     })
 
 
-    this.normalizedProgress.get((progress) => {
-      if (lastSubscription !== undefined) lastSubscription.cancel()
-      if (Math.abs(progress - lastProgress)  < 1) properProgress.set(progress)
-      else {
-        const duration = 300
-        this.currentOffsetOfBar = this.bar.absoluteOffset()
-        lastSubscription = animationFrame((time) => {
-          let timeProg = time / duration
-          properProgress.set(lastProgress + (timeProg * 2))
-        }, duration)
-      }
-      lastProgress = progress
+
+    
+    let lastSubscription: CancelAbleElapsingSubscriptionPromise
+    
+    let lastCurrentProg: number
+    let newNeeded = true
+    let currentDistance: Data<number> = new Data(0)
+    let absDistance = currentDistance.tunnel((distance) => Math.abs(distance)) as Data<number>
+    
+    let durationData = new Data(absDistance.get() * durationForFullWidth.get()) as Data<number>
+    new DataCollection(durationForFullWidth as Data<number>, absDistance).get((duration, distance) => {
+      durationData.set(duration * distance)
     }, false)
 
 
+    durationData.get((d) => {
+      console.log("dur", d)
+      if (!newNeeded) lastSubscription.duration(d)
+    })
+
+    this.normalizedProgress.get((wantedProg) => {
+      let currentProg = properProgress.get()
+      
+      if (Math.abs(wantedProg - lastProgress) * (currentWidth.get() as any as number) < 5) {
+        if (!newNeeded) lastSubscription.cancel()
+        properProgress.set(wantedProg)
+      }
+      else {
+        if (!newNeeded) {
+          let distanceProg = wantedProg - lastCurrentProg
+          //@ts-ignore
+          console.log("same")
+          currentDistance.set(distanceProg)
+        }
+        else {
+          
+          let distanceProg = wantedProg - currentProg
+          currentDistance.set(distanceProg)
+
+          //@ts-ignore
+          console.log("new------------------------------new------------------------------")
+
+          lastCurrentProg = currentProg
+          
+          
+          lastSubscription = animationFrame((time) => {
+            let timeProg = ease(time / durationData.get())
+            properProgress.set(timeProg * currentDistance.get() + currentProg)
+            
+          }, durationData.get())
+
+          lastSubscription.then(() => {
+            newNeeded = true
+          })
+
+          newNeeded = false
+        }
+      }
+      lastProgress = currentProg
+    }, false)
+
+
+
+    
+    new DataCollection(currentWidth, properProgress).get((width, progress) => {
+      this.handle.style.transform = `translateX(${width * progress}px)`
+    })
+
+
+
     activeListener.add(window.on("mousemove", calcOffsetFunc))
-
-    //@ts-ignore
-    window.properProgress = properProgress
-    properProgress.get(console.log)
-    //@ts-ignore
-    window.progress = this.progress
-
     activeListener.Inner("deactivate", [])
 
 
@@ -97,6 +147,10 @@ export default class Slider extends Component {
       if (factor !== undefined) {
         this.progress.set(this.properProgress.get() + (.1 * factor))
       }
+    })
+
+    this.on("dragstart", (e) => {
+      e.preventDefault()
     })
 
     this.on("mousedown", (e) => {
