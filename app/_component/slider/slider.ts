@@ -66,14 +66,34 @@ export default class Slider extends Component {
 
 
     
-    let lastSubscription: CancelAbleElapsingSubscriptionPromise
+    let subscription: CancelAbleElapsingSubscriptionPromise
     
-    let lastCurrentProg: number
     let newNeeded = true
     let currentDistance: Data<number> = new Data(0)
-    let absDistance = currentDistance.tunnel((distance) => Math.abs(distance)) as Data<number>
+    let absDistance = new Data() as Data<number>
+    let useDistance = new Data() as Data<number>
+    let lastDistance = currentDistance.get()
+    //@ts-ignore
+    subscription = {progress: () => 0}
+    let mySpeed: number = 0
+    currentDistance.get((distance) => {
+      let dis = mySpeed * Math.sign(distance)
+      console.log("distance", dis)
+
+      let currProg = subscription.progress()
+      let lastDistanceLeftOver = lastDistance - lastDistance * currProg
+
+      lastDistance += Math.abs(distance) - lastDistanceLeftOver
+
+      
+      useDistance.set(dis)
+      absDistance.set(lastDistance)
     
+      
+    })
+    absDistance.set(0)
     let durationData = new Data(absDistance.get() * durationForFullWidth.get()) as Data<number>
+
     new DataCollection(durationForFullWidth as Data<number>, absDistance).get((duration, distance) => {
       durationData.set(duration * distance)
     }, false)
@@ -81,41 +101,47 @@ export default class Slider extends Component {
 
     durationData.get((d) => {
       console.log("dur", d)
-      if (!newNeeded) lastSubscription.duration(d)
-    })
+      if (!newNeeded) subscription.duration(d)
+    }, false)
 
     this.normalizedProgress.get((wantedProg) => {
       let currentProg = properProgress.get()
       
       if (Math.abs(wantedProg - lastProgress) * (currentWidth.get() as any as number) < 5) {
-        if (!newNeeded) lastSubscription.cancel()
+        if (!newNeeded) subscription.cancel()
         properProgress.set(wantedProg)
       }
       else {
         if (!newNeeded) {
-          let distanceProg = wantedProg - lastCurrentProg
-          //@ts-ignore
+          let distance = wantedProg - currentProg
+
           console.log("same")
-          currentDistance.set(distanceProg)
+          // debugger
+          currentDistance.set(distance)
+ 
         }
         else {
           
-          let distanceProg = wantedProg - currentProg
-          currentDistance.set(distanceProg)
+          let distance = wantedProg - currentProg
+          mySpeed = Math.abs(distance)
+          currentDistance.set(distance)
 
-          //@ts-ignore
           console.log("new------------------------------new------------------------------")
 
-          lastCurrentProg = currentProg
-          
-          
-          lastSubscription = animationFrame((time) => {
-            let timeProg = ease(time / durationData.get())
-            properProgress.set(timeProg * currentDistance.get() + currentProg)
+          let lastTimeProg = 0
+          let dur = durationData.get()
+          subscription = animationFrame((time) => {
+            let timeProg = ease(time / durationData.get()) * durationData.get() / dur
+            let delta = timeProg - lastTimeProg
+            console.log("delta", delta, (delta * useDistance.get()) + properProgress.get())
+            properProgress.set((delta * useDistance.get()) + properProgress.get())
+            lastTimeProg = timeProg
             
           }, durationData.get())
 
-          lastSubscription.then(() => {
+          subscription.then(() => {
+            //@ts-ignore
+            subscription = {progress: () => 0}
             newNeeded = true
           })
 
