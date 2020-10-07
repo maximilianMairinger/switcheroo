@@ -22,7 +22,7 @@ coverElem.on("dragstart", (e) => {
 })
 
 
-const animationDurationPer100px = 2400
+const animationDurationPer100px = 400
 
 const ease = new Easing("linear").function
 
@@ -63,7 +63,7 @@ export default class Slider extends Component {
 
     let currentWidth = this.bar.resizeData().tunnel(({width}) => width) as any as Data<number>
     let durationForFullWidth = currentWidth.tunnel((e) => {
-      return e / 100 * animationDurationPer100px
+      return e * animationDurationPer100px / 100
     })
 
 
@@ -119,26 +119,24 @@ export default class Slider extends Component {
           let distance = wantedProg - currentProg
 
           console.log("same")
-          // debugger
           currentDistance.set(distance)
  
         }
         else {
           
           let distance = wantedProg - currentProg
-          mySpeed = Math.abs(distance)
+          mySpeed = Math.abs(currentWidth.get() / durationForFullWidth.get() / 7.5)
+          console.log(mySpeed)
           currentDistance.set(distance)
 
           console.log("new------------------------------new------------------------------")
 
-          let lastTimeProg = 0
-          let dur = durationData.get()
-          subscription = animationFrame((time) => {
-            let timeProg = ease(time / durationData.get()) * durationData.get() / dur
-            let delta = timeProg - lastTimeProg
-            console.log("delta", delta, (delta * useDistance.get()) + properProgress.get())
-            properProgress.set((delta * useDistance.get()) + properProgress.get())
-            lastTimeProg = timeProg
+          let prog = properProgress.get()
+          subscription = animationFrame((time, delta,) => {
+            
+            console.log("prog", prog)
+            prog = (delta * useDistance.get()) + prog
+            properProgress.set(ease(prog))
             
           }, durationData.get())
 
